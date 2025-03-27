@@ -1,12 +1,10 @@
-from typing import Tuple
-
 import numpy as np
 from numpy.typing import NDArray
 
 from util import lasso_loss, run_algorithm
 
 
-def pdhg_solver(A: NDArray, b: NDArray, mu: float) -> Tuple[float, NDArray, int]:
+def pdhg_solver(A: NDArray, b: NDArray, mu: float) -> tuple[float, NDArray, int]:
     m, n = A.shape
     max_eigval = np.sqrt(np.max(np.linalg.eigvalsh(A @ A.T)))
     step_size_z = 2 / max_eigval

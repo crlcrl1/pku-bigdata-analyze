@@ -1,12 +1,10 @@
-from typing import Tuple
-
 import numpy as np
 from numpy.typing import NDArray
 
 from util import lasso_loss, run_algorithm
 
 
-def admm_dual_solver(A: NDArray, b: NDArray, mu: float) -> Tuple[float, NDArray, int]:
+def admm_dual_solver(A: NDArray, b: NDArray, mu: float) -> tuple[float, NDArray, int]:
     m, n = A.shape
     iter_count = 0
     tol = 1e-8

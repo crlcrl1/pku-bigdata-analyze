@@ -1,5 +1,4 @@
 import math
-from typing import Tuple
 
 import torch
 from torch import Tensor
@@ -7,7 +6,7 @@ from torch import Tensor
 from util import lasso_loss, run_algorithm, _device
 
 
-def admm_dual_solver(A: Tensor, b: Tensor, mu: float) -> Tuple[float, Tensor, int]:
+def admm_dual_solver(A: Tensor, b: Tensor, mu: float) -> tuple[float, Tensor, int]:
     m, n = A.shape
     dtype = A.dtype
     iter_count = 0
@@ -22,7 +21,7 @@ def admm_dual_solver(A: Tensor, b: Tensor, mu: float) -> Tuple[float, Tensor, in
     step_size = (1 + math.sqrt(5)) / 2
 
     @torch.compile
-    def iterate(x: Tensor, z: Tensor) -> Tuple[Tensor, Tensor, Tensor]:
+    def iterate(x: Tensor, z: Tensor) -> tuple[Tensor, Tensor, Tensor]:
         y = inv @ (A @ (rho * z - x) - b)
 
         z = x / rho + A.T @ y

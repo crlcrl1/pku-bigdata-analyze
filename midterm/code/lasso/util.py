@@ -1,12 +1,12 @@
-from typing import Tuple, Callable
 import time
+from typing import Callable
 
 import numpy as np
-from numpy.typing import NDArray
 import scipy
+from numpy.typing import NDArray
 
 
-def gen_data(m: int, n: int, *, density: float, seed: int = 0) -> Tuple[NDArray, NDArray, NDArray]:
+def gen_data(m: int, n: int, *, density: float, seed: int = 0) -> tuple[NDArray, NDArray, NDArray]:
     np.random.seed(seed)
     A = np.random.randn(m, n)
     u = scipy.sparse.random(n, 1, density=density, data_rvs=np.random.randn).toarray().flatten()

@@ -1,12 +1,10 @@
-from typing import Tuple
-
 import torch
 from torch import Tensor
 
 from util import lasso_loss, run_algorithm, _device
 
 
-def prox_solver(A: Tensor, b: Tensor, mu: float) -> Tuple[float, Tensor, int]:
+def prox_solver(A: Tensor, b: Tensor, mu: float) -> tuple[float, Tensor, int]:
     m, n = A.shape
     dtype = A.dtype
     mu_list = list(reversed([(5 ** i) * mu for i in range(6)]))
@@ -21,7 +19,7 @@ def prox_solver(A: Tensor, b: Tensor, mu: float) -> Tuple[float, Tensor, int]:
     zeros = torch.zeros_like(x)
 
     @torch.compile
-    def iterate(x: Tensor, grad_last: Tensor, x_last: Tensor) -> Tuple[Tensor, Tensor, Tensor]:
+    def iterate(x: Tensor, grad_last: Tensor, x_last: Tensor) -> tuple[Tensor, Tensor, Tensor]:
         # apply grad step
         grad = A.T @ (A @ x - b)
         s = x - x_last

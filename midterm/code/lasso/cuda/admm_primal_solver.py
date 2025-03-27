@@ -1,13 +1,13 @@
 import math
-from typing import Tuple
 
 import torch
 from torch import Tensor
+from viztracer import VizTracer
 
 from util import lasso_loss, run_algorithm, _device
 
 
-def admm_primal_solver(A: Tensor, b: Tensor, mu: float) -> Tuple[float, Tensor, int]:
+def admm_primal_solver(A: Tensor, b: Tensor, mu: float) -> tuple[float, Tensor, int]:
     m, n = A.shape
     dtype = A.dtype
     y = torch.zeros(n, device=_device, dtype=dtype)
@@ -22,8 +22,8 @@ def admm_primal_solver(A: Tensor, b: Tensor, mu: float) -> Tuple[float, Tensor, 
 
     zeros = torch.zeros_like(z)
 
-    @torch.compile
-    def iterate(z: Tensor, y: Tensor) -> Tuple[Tensor, Tensor, Tensor]:
+    # @torch.compile
+    def iterate(z: Tensor, y: Tensor) -> tuple[Tensor, Tensor, Tensor]:
         x = inv @ (temp + rho * z - y)
 
         z = x + y / rho
@@ -48,4 +48,5 @@ def admm_primal_solver(A: Tensor, b: Tensor, mu: float) -> Tuple[float, Tensor, 
 
 
 if __name__ == "__main__":
-    run_algorithm(512, 1024, 0.1, 0, 0.01, admm_primal_solver, benchmark=True)
+    with VizTracer(log_torch=True):
+        run_algorithm(512, 1024, 0.1, 0, 0.01, admm_primal_solver)

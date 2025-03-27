@@ -1,12 +1,10 @@
-from typing import Tuple
-
 from util import run_algorithm
 
 from mosek.fusion import Model, Domain, Expr, ObjectiveSense
 from numpy.typing import NDArray
 
 
-def mosek_solver(A: NDArray, b: NDArray, mu: float) -> Tuple[float, NDArray, int]:
+def mosek_solver(A: NDArray, b: NDArray, mu: float) -> tuple[float, NDArray, int]:
     m, n = A.shape
     with Model("LASSO") as M:
         x = M.variable("x", n, Domain.unbounded())

@@ -1,5 +1,3 @@
-from typing import Tuple
-
 import gurobipy as gp
 from gurobipy import GRB
 from numpy.typing import NDArray
@@ -7,7 +5,7 @@ from numpy.typing import NDArray
 from util import run_algorithm
 
 
-def gurobi_solver(A: NDArray, b: NDArray, mu: float) -> Tuple[float, NDArray, int]:
+def gurobi_solver(A: NDArray, b: NDArray, mu: float) -> tuple[float, NDArray, int]:
     model = gp.Model()
 
     m, n = A.shape

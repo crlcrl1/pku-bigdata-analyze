@@ -1,4 +1,4 @@
-from typing import Tuple, Callable
+from typing import Callable
 import time
 
 import torch
@@ -9,7 +9,7 @@ import scipy
 _device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
-def gen_data(m: int, n: int, *, density: float, seed: int = 0, dtype=torch.float64) -> Tuple[Tensor, Tensor, Tensor]:
+def gen_data(m: int, n: int, *, density: float, seed: int = 0, dtype=torch.float64) -> tuple[Tensor, Tensor, Tensor]:
     np.random.seed(seed)
     A = np.random.randn(m, n)
     u = scipy.sparse.random(n, 1, density=density, data_rvs=np.random.randn).toarray().flatten()
@@ -20,7 +20,7 @@ def gen_data(m: int, n: int, *, density: float, seed: int = 0, dtype=torch.float
     return A, u, b
 
 
-@torch.compile
+# @torch.compile
 def lasso_loss(A: Tensor, b: Tensor, x: Tensor, mu: float) -> float:
     return torch.linalg.norm(A @ x - b) ** 2 + mu * torch.linalg.norm(x, ord=1)
 

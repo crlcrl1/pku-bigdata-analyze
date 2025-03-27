@@ -1,12 +1,10 @@
-from typing import Tuple
-
 import numpy as np
 from numpy.typing import NDArray
 
 from util import lasso_loss, run_algorithm
 
 
-def prox_solver(A: NDArray, b: NDArray, mu: float) -> Tuple[float, NDArray, int]:
+def prox_solver(A: NDArray, b: NDArray, mu: float) -> tuple[float, NDArray, int]:
     m, n = A.shape
     step_size = 0.01
     mu_list = list(reversed([(5 ** i) * mu for i in range(6)]))

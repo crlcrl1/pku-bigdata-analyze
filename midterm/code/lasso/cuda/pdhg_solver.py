@@ -1,12 +1,10 @@
-from typing import Tuple
-
 import torch
 from torch import Tensor
 
 from util import lasso_loss, run_algorithm, _device
 
 
-def pdhg_solver(A: Tensor, b: Tensor, mu: float) -> Tuple[float, Tensor, int]:
+def pdhg_solver(A: Tensor, b: Tensor, mu: float) -> tuple[float, Tensor, int]:
     m, n = A.shape
     dtype = A.dtype
     max_eigval = torch.max(torch.linalg.eigvalsh(A @ A.T)).sqrt()
@@ -23,7 +21,7 @@ def pdhg_solver(A: Tensor, b: Tensor, mu: float) -> Tuple[float, Tensor, int]:
     iter_count = 0
 
     @torch.compile
-    def iterate(x: Tensor, z: Tensor) -> Tuple[Tensor, Tensor]:
+    def iterate(x: Tensor, z: Tensor) -> tuple[Tensor, Tensor]:
         z = 1 / (1 + step_size_z) * (z + step_size_z * (A @ x - b))
         x -= step_size_x * A.T @ z
         x = torch.sign(x) * torch.maximum(torch.abs(x) - mu * step_size_x, zeros)
