@@ -31,6 +31,7 @@ def pdhg_solver(A: NDArray, b: NDArray, mu: float) -> Tuple[float, NDArray, int]
             z = 1 / (1 + step_size_z) * (z + step_size_z * (A @ x - b))
             x = x - step_size_x * A.T @ z
             x = np.sign(x) * np.maximum(np.abs(x) - mu * step_size_x, 0)
+            x[np.abs(x) < 1e-5] = 0
 
             f_new = lasso_loss(A, b, x, mu)
             if abs(f_last - f_new) < tol:
@@ -41,4 +42,4 @@ def pdhg_solver(A: NDArray, b: NDArray, mu: float) -> Tuple[float, NDArray, int]
 
 
 if __name__ == "__main__":
-    run_algorithm(512, 1024, 0.1, 0, 0.01, pdhg_solver)
+    run_algorithm(512, 1024, 0.1, 0, 0.01, pdhg_solver, benchmark=True)

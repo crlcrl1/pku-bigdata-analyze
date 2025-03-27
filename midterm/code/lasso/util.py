@@ -4,7 +4,6 @@ import time
 import numpy as np
 from numpy.typing import NDArray
 import scipy
-import numba
 
 
 def gen_data(m: int, n: int, *, density: float, seed: int = 0) -> Tuple[NDArray, NDArray, NDArray]:
@@ -23,7 +22,9 @@ def run_algorithm(m: int, n: int, density: float, seed: int, mu: float, func: Ca
     A, u, b = gen_data(m, n, density=density, seed=seed)
     f, x, iter_num = func(A, b, mu)
     print(f"Optimal value: {f}, Iteration number: {iter_num}")
+    max_elem = np.max(np.abs(x))
     print(f"Error: {np.linalg.norm(x - u):.4e}")
+    print(f"Sparsity: {np.sum(np.abs(x) > 1e-6 * max_elem) / n:.4f}")
     if benchmark:
         for _ in range(10):
             func(A, b, mu)

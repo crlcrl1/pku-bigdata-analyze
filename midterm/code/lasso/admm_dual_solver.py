@@ -42,4 +42,4 @@ def admm_dual_solver(A: NDArray, b: NDArray, mu: float) -> Tuple[float, NDArray,
 
 
 if __name__ == "__main__":
-    run_algorithm(512, 1024, 0.1, 0, 0.01, admm_dual_solver)
+    run_algorithm(512, 1024, 0.1, 0, 0.01, admm_dual_solver, benchmark=True)

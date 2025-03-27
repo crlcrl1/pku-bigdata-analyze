@@ -42,4 +42,4 @@ def admm_primal_solver(A: NDArray, b: NDArray, mu: float) -> Tuple[float, NDArra
 
 
 if __name__ == "__main__":
-    run_algorithm(512, 1024, 0.1, 0, 0.01, admm_primal_solver)
+    run_algorithm(512, 1024, 0.1, 0, 0.01, admm_primal_solver, benchmark=True)
