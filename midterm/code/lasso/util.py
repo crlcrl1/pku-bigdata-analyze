@@ -25,8 +25,10 @@ def run_algorithm(m: int, n: int, density: float, seed: int, mu: float, func: Ca
     print(f"Optimal value: {f}, Iteration number: {iter_num}")
     print(f"Error: {np.linalg.norm(x - u):.4e}")
     if benchmark:
+        for _ in range(10):
+            func(A, b, mu)
         start = time.time()
-        for _ in range(100):
+        for _ in range(40):
             func(A, b, mu)
         end = time.time()
-        print(f"Average runtime: {(end - start) / 100:.6f} sec")
+        print(f"Average runtime: {(end - start) / 40:.6f} sec")
