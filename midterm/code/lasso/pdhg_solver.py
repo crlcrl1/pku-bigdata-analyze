@@ -8,7 +8,8 @@ from util import lasso_loss, run_algorithm
 
 def pdhg_solver(A: NDArray, b: NDArray, mu: float) -> Tuple[float, NDArray, int]:
     m, n = A.shape
-    step_size_z = 2 / np.linalg.norm(A, ord=2)
+    max_eigval = np.sqrt(np.max(np.linalg.eigvalsh(A @ A.T)))
+    step_size_z = 2 / max_eigval
     step_size_x = step_size_z / 4
     mu_list = list(reversed([(5 ** i) * mu for i in range(5)]))
     last_idx = len(mu_list) - 1

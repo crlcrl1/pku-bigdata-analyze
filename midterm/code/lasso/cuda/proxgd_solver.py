@@ -16,9 +16,6 @@ def prox_solver(A: Tensor, b: Tensor, mu: float) -> Tuple[float, Tensor, int]:
     total_iter = 0
     tol = 1e-8
 
-    ata = A.T @ A
-    atb = A.T @ b
-
     grad_last = torch.zeros(n, device=_device, dtype=dtype)
     x_last = torch.zeros(n, device=_device, dtype=dtype)
     zeros = torch.zeros_like(x)
@@ -26,7 +23,7 @@ def prox_solver(A: Tensor, b: Tensor, mu: float) -> Tuple[float, Tensor, int]:
     @torch.compile
     def iterate(x: Tensor, grad_last: Tensor, x_last: Tensor) -> Tuple[Tensor, Tensor, Tensor]:
         # apply grad step
-        grad = ata @ x - atb
+        grad = A.T @ (A @ x - b)
         s = x - x_last
         y = grad - grad_last
         if total_iter > 1:
@@ -34,7 +31,6 @@ def prox_solver(A: Tensor, b: Tensor, mu: float) -> Tuple[float, Tensor, int]:
         else:
             step_size = 0.01
         x_last = x.clone()
-        grad_last = grad
         x -= step_size * grad
 
         # apply prox
@@ -42,7 +38,7 @@ def prox_solver(A: Tensor, b: Tensor, mu: float) -> Tuple[float, Tensor, int]:
         x = sign * torch.maximum(torch.abs(x) - mu * step_size, zeros)
         x[torch.abs(x) < 1e-4] = 0
 
-        return x, grad_last, x_last
+        return x, grad, x_last
 
     for k, mu in enumerate(mu_list):
         inner_iter = 0

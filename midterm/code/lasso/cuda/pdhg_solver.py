@@ -9,8 +9,9 @@ from util import lasso_loss, run_algorithm, _device
 def pdhg_solver(A: Tensor, b: Tensor, mu: float) -> Tuple[float, Tensor, int]:
     m, n = A.shape
     dtype = A.dtype
-    step_size_z = 2 / torch.linalg.norm(A, ord=2)
-    step_size_x = step_size_z / 4
+    max_eigval = torch.max(torch.linalg.eigvalsh(A @ A.T)).sqrt()
+    step_size_z = 2 / max_eigval
+    step_size_x = 1 / (2 * max_eigval)
     mu_list = list(reversed([(5 ** i) * mu for i in range(5)]))
     last_idx = len(mu_list) - 1
 
@@ -49,4 +50,4 @@ def pdhg_solver(A: Tensor, b: Tensor, mu: float) -> Tuple[float, Tensor, int]:
 
 
 if __name__ == "__main__":
-    run_algorithm(512, 1024, 0.1, 0, 0.01, pdhg_solver, benchmark=True, dtype=torch.float32)
+    run_algorithm(512, 1024, 0.1, 1, 0.01, pdhg_solver, benchmark=True, dtype=torch.float32)

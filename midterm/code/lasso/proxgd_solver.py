@@ -15,9 +15,6 @@ def prox_solver(A: NDArray, b: NDArray, mu: float) -> Tuple[float, NDArray, int]
     x = np.zeros(n)
     total_iter = 0
 
-    ata = A.T @ A
-    atb = A.T @ b
-
     grad_last = np.zeros(n)
     x_last = np.zeros(n)
 
@@ -30,7 +27,7 @@ def prox_solver(A: NDArray, b: NDArray, mu: float) -> Tuple[float, NDArray, int]
                 break
 
             # apply grad step
-            grad = ata @ x - atb
+            grad = A.T @ (A @ x - b)
             s = x - x_last
             y = grad - grad_last
             if total_iter > 1:
