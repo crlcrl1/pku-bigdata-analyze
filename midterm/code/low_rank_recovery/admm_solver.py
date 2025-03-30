@@ -27,7 +27,7 @@ def admm_solver(M: NDArray, omega: NDArray, mu: float, m: int, n: int) -> tuple[
         Z = X + Y / rho
         U, s, Vt = np.linalg.svd(Z)
         s = np.maximum(s - mu / rho, 0)
-        Z = U @ np.diag(s) @ Vt
+        Z = U * s @ Vt
 
         # update Y
         Y = Y + step_size * rho * (X - Z)

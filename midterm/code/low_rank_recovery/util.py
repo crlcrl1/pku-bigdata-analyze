@@ -29,10 +29,10 @@ def run_algorithm(m: int, n: int, r: int, sample_rate: float, mu: float, func: C
     print(f"Error: {np.linalg.norm(X - A):.4e}")
     print(f"Rank: {np.linalg.matrix_rank(X)}")
     if benchmark:
-        for _ in range(10):
+        for _ in range(5):
             func(M, omega, mu, m, n)
         start = time.time()
-        for _ in range(40):
+        for _ in range(20):
             func(M, omega, mu, m, n)
         end = time.time()
-        print(f"Average runtime: {(end - start) / 40:.6f} sec")
+        print(f"Average runtime: {(end - start) / 20:.6f} sec")
