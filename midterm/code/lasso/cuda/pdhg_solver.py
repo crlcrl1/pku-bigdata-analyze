@@ -48,4 +48,4 @@ def pdhg_solver(A: Tensor, b: Tensor, mu: float) -> tuple[float, Tensor, int]:
 
 
 if __name__ == "__main__":
-    run_algorithm(512, 1024, 0.1, 1, 0.01, pdhg_solver, benchmark=True, dtype=torch.float32)
+    run_algorithm(512, 1024, 0.1, 0, 0.01, pdhg_solver, benchmark=True, dtype=torch.float32)
