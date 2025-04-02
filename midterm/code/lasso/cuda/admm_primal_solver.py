@@ -2,7 +2,6 @@ import math
 
 import torch
 from torch import Tensor
-from viztracer import VizTracer
 
 from util import lasso_loss, run_algorithm, _device
 
@@ -48,5 +47,4 @@ def admm_primal_solver(A: Tensor, b: Tensor, mu: float) -> tuple[float, Tensor, 
 
 
 if __name__ == "__main__":
-    with VizTracer(log_torch=True):
-        run_algorithm(512, 1024, 0.1, 0, 0.01, admm_primal_solver)
+    run_algorithm(512, 1024, 0.1, 0, 0.01, admm_primal_solver)

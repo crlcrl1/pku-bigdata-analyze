@@ -6,27 +6,27 @@ from numpy.typing import NDArray
 
 def mosek_solver(A: NDArray, b: NDArray, mu: float) -> tuple[float, NDArray, int]:
     m, n = A.shape
-    with Model("LASSO") as M:
-        x = M.variable("x", n, Domain.unbounded())
+    with Model("LASSO") as model:
+        x = model.variable("x", n, Domain.unbounded())
 
-        t = M.variable("t", n, Domain.greaterThan(0.0))
+        t = model.variable("t", n, Domain.greaterThan(0.0))
 
-        M.constraint(Expr.sub(t, x), Domain.greaterThan(0.0))
-        M.constraint(Expr.add(t, x), Domain.greaterThan(0.0))
+        model.constraint(Expr.sub(t, x), Domain.greaterThan(0.0))
+        model.constraint(Expr.add(t, x), Domain.greaterThan(0.0))
 
-        r = M.variable("r", m, Domain.unbounded())
-        M.constraint(Expr.sub(Expr.mul(A, x), r), Domain.equalsTo(b))
+        r = model.variable("r", m, Domain.unbounded())
+        model.constraint(Expr.sub(Expr.mul(A, x), r), Domain.equalsTo(b))
 
-        q = M.variable("q", 1, Domain.greaterThan(0.0))
+        q = model.variable("q", 1, Domain.greaterThan(0.0))
 
-        M.constraint(Expr.vstack(q, r), Domain.inQCone())
+        model.constraint(Expr.vstack(q, r), Domain.inQCone())
 
-        M.objective(ObjectiveSense.Minimize, Expr.add(Expr.mul(mu, Expr.sum(t)), Expr.mul(0.5, q)))
+        model.objective(ObjectiveSense.Minimize, Expr.add(Expr.mul(mu, Expr.sum(t)), Expr.mul(0.5, q)))
 
-        M.solve()
+        model.solve()
 
         x_opt = x.level()
-        obj_val = M.primalObjValue()
+        obj_val = model.primalObjValue()
         return obj_val, x_opt, -1
 
 
