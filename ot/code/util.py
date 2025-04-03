@@ -1,4 +1,5 @@
 from typing import Callable
+import argparse
 
 import numpy as np
 from PIL import Image
@@ -35,4 +36,4 @@ def run_algorithm(src_path: str, dest_path: str, func: Callable, **kwargs):
 
     solution, total_cost, iter_num = func(cost, alpha, beta, **kwargs)
 
-    print(f"Total cost: {total_cost}")
+    print(f"Total cost: {total_cost}, Iterations: {iter_num}")

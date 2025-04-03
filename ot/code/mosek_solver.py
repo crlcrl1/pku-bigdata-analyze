@@ -4,8 +4,6 @@ import numpy as np
 from numpy.typing import NDArray
 from mosek.fusion import Model, Domain, Expr, ObjectiveSense
 
-from util import run_algorithm
-
 
 def mosek_solver(c: NDArray, alpha: NDArray, beta: NDArray,
                  method: Literal["intpnt", "primalSimplex", "dualSimplex"] = "intpnt") -> tuple[NDArray, float, int]:
@@ -27,7 +25,3 @@ def mosek_solver(c: NDArray, alpha: NDArray, beta: NDArray,
         pi_opt = pi.level().reshape(m, n)
         total_cost = model.primalObjValue()
         return pi_opt, total_cost, 0
-
-
-if __name__ == "__main__":
-    run_algorithm("source.png", "dest.png", mosek_solver, method="dualSimplex")

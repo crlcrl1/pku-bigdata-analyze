@@ -2,8 +2,6 @@ import gurobipy as gp
 import numpy as np
 from numpy.typing import NDArray
 
-from util import run_algorithm
-
 
 def gurobi_solver(c: NDArray, alpha: NDArray, beta: NDArray, *, method: int = 0):
     m = len(alpha)
@@ -30,7 +28,3 @@ def gurobi_solver(c: NDArray, alpha: NDArray, beta: NDArray, *, method: int = 0)
         return solution, total_cost, -1
     else:
         raise ValueError("Gurobi solver failed")
-
-
-if __name__ == "__main__":
-    run_algorithm("source.png", "dest.png", gurobi_solver, method=2)
