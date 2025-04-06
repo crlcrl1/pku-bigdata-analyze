@@ -5,8 +5,12 @@ from numpy.typing import NDArray
 from mosek.fusion import Model, Domain, Expr, ObjectiveSense
 
 
-def mosek_solver(c: NDArray, alpha: NDArray, beta: NDArray,
-                 method: Literal["intpnt", "primalSimplex", "dualSimplex"] = "intpnt") -> tuple[NDArray, float, int]:
+def mosek_solver(
+        c: NDArray,
+        alpha: NDArray,
+        beta: NDArray,
+        method: Literal["intpnt", "primalSimplex", "dualSimplex"] = "intpnt",
+) -> tuple[NDArray, float, int]:
     m = len(alpha)
     n = len(beta)
 
@@ -24,4 +28,13 @@ def mosek_solver(c: NDArray, alpha: NDArray, beta: NDArray,
         model.solve()
         pi_opt = pi.level().reshape(m, n)
         total_cost = model.primalObjValue()
-        return pi_opt, total_cost, 0
+
+        iter_count = 0
+        if method == "intpnt":
+            iter_count = model.getSolverIntInfo("intpntIter")
+        elif method == "primalSimplex":
+            iter_count = model.getSolverIntInfo("simPrimalIter")
+        elif method == "dualSimplex":
+            iter_count = model.getSolverIntInfo("simDualIter")
+
+        return pi_opt, total_cost, iter_count

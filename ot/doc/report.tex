@@ -1,0 +1,153 @@
+\documentclass{article}
+
+\usepackage{neurips_2022}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{hyperref}
+\usepackage{url}
+\usepackage{booktabs}
+\usepackage{amsfonts}
+\usepackage{nicefrac}
+\usepackage{microtype}
+\usepackage{xcolor}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage[UTF8, fontset=adobe]{ctex}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{resizegather}
+\usepackage{graphicx}
+\usepackage{subfigure}
+
+\hypersetup{
+    colorlinks=true,
+    linkbordercolor=white
+}
+\setlength{\parindent}{2em}
+
+\title{大数据分析中的算法上机报告}
+
+\author{陈润璘 \texttt{2200010848}}
+
+\begin{document}
+
+\maketitle
+
+\section{问题描述}
+最优传输（Optimal Transport, OT）问题目标是通过最小化传输成本，将一个分布（源分布）映射到另一个分布（目标分布）。数学上，最优传输问题可以表示为以下形式：
+\begin{align}
+    \min \quad &\sum_{i,j} c_{ij} \pi_{ij},\\
+    \text{s.t.} \quad &\sum_j \pi_{ij} = \alpha_i,\\
+    & \sum_i \pi_{ij} = \beta_j,\\
+    & \pi_{ij} \geq 0,
+\end{align}
+
+其中：
+\begin{itemize}
+    \item $c_{ij}$ 表示从源点 $i$ 到目标点 $j$ 的传输成本；
+    \item $\pi_{ij}$ 表示从 $i$ 到 $j$ 的传输量；
+    \item $\alpha$ 和 $\beta$ 分别是源分布和目标分布。
+\end{itemize}
+本次上机作业使用 Python 调用了 Gurobi 和 Mosek 求解器的不同方法来求解最优传输问题，并实现了 Sinkhorn 算法。
+
+\section{数值方法}
+
+\subsection{Mosek 和 Gurobi 求解器}
+Mosek 和 Gurobi 是两个常用的优化求解器，能够高效地求解线性规划问题。它们都提供了 Python 接口，可以方便地在 Python 中调用。在调用这两个求解器时，我们只需要将最优传输问题转化为线性规划的标准形式，并使用求解器提供的接口进行求解即可。在本次上机作业中，我们分别使用了两个求解器的内点法和单纯形法来求解最优传输问题。
+
+\subsection{最优传输问题的熵正则化形式}
+最优传输问题的熵正则化形式是通过引入一个正则化项来平滑最优传输矩阵，从而使得求解过程更加稳定。熵正则化形式可以表示为：
+\begin{align}
+    \min \quad &\sum_{i,j} C_{ij} \pi_{ij} + \epsilon \sum_{i,j} \pi_{ij} \log \pi_{ij},\\
+    \text{s.t.} \quad &\sum_j \pi_{ij} = \alpha_i,\\
+    & \sum_i \pi_{ij} = \beta_j,\\
+    & \pi_{ij} \geq 0,
+\end{align}
+其中 $\epsilon$ 是正则化参数。熵正则化项 $\epsilon \sum_{i,j} \pi_{ij} \log \pi_{ij}$ 可以看作是对传输矩阵的平滑约束，使得求解过程更加稳定。
+
+\subsection{Sinkhorn 算法}
+熵正则化形式的最优传输问题可以通过 Sinkhorn 算法来求解。Sinkhorn 算法是一种迭代方法，通过引入正则化项，将原问题转化为更易求解的形式。Sinkhorn 算法的核心思想是通过迭代更新传输矩阵，使其满足源分布和目标分布的约束条件，同时最小化传输成本。
+
+以下是 Sinkhorn 算法的伪代码：
+\begin{algorithm}[H]
+    \caption{Sinkhorn 算法}
+    \begin{algorithmic}[1]
+        \Require 代价矩阵 $C$，源分布 $\alpha$，目标分布 $\beta$，正则化参数 $\epsilon$，最大迭代次数 $\text{max\_iter}$，容差 $\text{tol}$
+        \Ensure 最优传输矩阵 $\pi$，总传输成本 $\text{total\_cost}$，迭代次数 $\text{iter\_num}$
+        \State $K \gets \exp(-C / \epsilon)$
+        \State $\hat{K} \gets \text{diag}(1 / \alpha) \cdot K$
+        \State $u \gets \mathbf{1}$，$\text{iter\_num} \gets 0$
+        \Repeat
+        \State $\text{iter\_num} \gets \text{iter\_num} + 1$
+        \State $u_{\text{prev}} \gets u$
+        \State $u \gets 1 / (\hat{K} \cdot (\beta / (K^T \cdot u)))$
+        \Until $\| u - u_{\text{prev}} \|_\infty < \text{tol}$ 或 $\text{iter\_num} \geq \text{max\_iter}$
+        \State $v \gets \beta / (K^T \cdot u)$
+        \State $\pi \gets \text{diag}(u) \cdot K \cdot \text{diag}(v)$
+        \State $\text{total\_cost} \gets \sum_{i,j} \pi_{ij} \cdot C_{ij}$
+        \State \Return $\pi, \text{total\_cost}, \text{iter\_num}$
+    \end{algorithmic}
+\end{algorithm}
+
+\section{数值结果}
+\subsection{实验设置}
+
+本次上机作业使用了两张给定的 $32\times32$ 的灰度图作为源分布和目标分布。同时我也选取了 MNIST 数据集中的三张图片作为源分布和目标分布，其中两张图片为数字 $0$，一张图片为数字 $1$。
+
+\subsection{实验结果}
+对于作业中给定的两张 $32\times32$ 的灰度图，我们使用 Sinkhorn 算法、Mosek 和 Gurobi 求解器分别求解了最优传输问题，其中 Sinkhorn 算法的迭代停止条件为前一次与当前迭代中 $u$ 的差异的无穷范数小于 $1e-4$。以下是实验结果的对比：
+\begin{table}[h]
+    \centering
+    \begin{tabular}{l|c|c|c}
+        \toprule
+        \hline
+        方法 & 最优传输距离 & 迭代次数 & 运行时间（秒） \\
+        \hline
+        Sinkhorn（$\epsilon=1$） & 5.927715 & 1324 & 0.7553 \\
+        \hline
+        Sinkhorn（$\epsilon=0.1$） & 5.257658 & 18749 & 7.7851 \\
+        \hline
+        Mosek（原问题单纯形法） & 5.257408 & 22707 & 2.6654 \\
+        \hline
+        Mosek（对偶单纯形法） & 5.257395 & 6689 & 6.8500 \\
+        \hline
+        Mosek（内点法） & 5.257395 & 12 & 4.8291 \\
+        \hline
+        Gurobi（原问题单纯形法） & 5.257395 & 17503 & 7.7789 \\
+        \hline
+        Gurobi（对偶单纯形法） & 5.257395 & 1666 & 7.8779 \\
+        \hline
+        Gurobi（内点法） & 5.257395 & 14 & 7.9534 \\
+        \hline
+        \bottomrule
+    \end{tabular}
+    \caption{三种方法的实验结果对比}
+\end{table}
+
+同时，我也使用 Sinkhorn 算法对 MNIST 数据集中的三张图片进行了实验，取 $\epsilon=0.2$，分别计算两个数字 $0$ 以及一个数字 $0$ 和数字 $1$ 之间的最优传输距离，结果如下：
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{l|c|c|c}
+        \toprule
+        \hline
+        方法 & 最优传输距离 & 迭代次数 & 运行时间（秒） \\
+        \hline
+        数字 $0$ 和 数字 $0$ & 3.866520 & 18711 & 6.0939 \\
+        \hline
+        数字 $0$ 和 数字 $1$ & 13.508254 & 12811 & 4.8959 \\
+        \hline
+        \bottomrule
+    \end{tabular}
+    \caption{MNIST 数据集实验结果}
+\end{table}
+
+\subsection{结果分析}
+\begin{itemize}
+    \item \textbf{Sinkhorn 算法}：由于引入了正则化项，Sinkhorn 算法的结果可能与精确解存在一定偏差，此外，在应用 Sinkhorn 算法时需要控制正则化参数 $\epsilon$ 的大小以保证算法的稳定性和求解的误差。
+    \item \textbf{Mosek 和 Gurobi 求解器}：这两个商业求解器实现的单纯形法和内点法在求解最优传输问题时表现出色，能够快速收敛到精确解。Mosek 和 Gurobi 的求解器在处理大规模问题时具有较高的效率。
+\end{itemize}
+
+此外，从 MNIST 数据集的实验结果来看，数字 $0$ 和数字 $1$ 之间的最优传输距离明显大于两个数字 $0$ 之间的最优传输距离，这表明数字 $0$ 和数字 $1$ 在图像特征上存在较大的差异。
+
+\end{document}

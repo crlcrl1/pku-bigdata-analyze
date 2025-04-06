@@ -12,8 +12,8 @@ def main():
     parser.add_argument("dest_path", type=str, help="Path to the destination image")
     parser.add_argument("algorithm", type=str, choices=["sinkhorn", "gurobi", "mosek"], help="Algorithm to use")
     parser.add_argument("--epsilon", type=float, default=0.1, help="Epsilon for Sinkhorn algorithm")
-    parser.add_argument("--max-iter", type=int, default=1000, help="Max iterations for Sinkhorn algorithm")
-    parser.add_argument("--tol", type=float, default=1e-6, help="Tolerance for Sinkhorn algorithm")
+    parser.add_argument("--max-iter", type=int, default=10000, help="Max iterations for Sinkhorn algorithm")
+    parser.add_argument("--tol", type=float, default=1e-4, help="Tolerance for Sinkhorn algorithm")
     parser.add_argument("--method", type=str, default="intpnt",
                         choices=["intpnt", "primalSimplex", "dualSimplex"], help="Method for Mosek solver")
 
@@ -34,7 +34,7 @@ def main():
                 raise ValueError("Invalid method for Gurobi solver.")
         run_algorithm(args.src_path, args.dest_path, gurobi_solver, method=method)
     elif args.algorithm == "mosek":
-        run_algorithm(args.src_path, args.dest_path, mosek_solver, method=args.mosek_method)
+        run_algorithm(args.src_path, args.dest_path, mosek_solver, method=args.method)
 
 
 if __name__ == "__main__":

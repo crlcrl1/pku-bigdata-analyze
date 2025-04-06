@@ -5,8 +5,7 @@ from numpy.typing import NDArray
 def sinkhorn_algorithm(c: NDArray, alpha: NDArray, beta: NDArray, epsilon=0.1, max_iter=1000, tol=1e-6):
     m, n = c.shape
     K = np.exp(-c / epsilon)
-    print(alpha.min(), alpha.max())
-    K1 = np.diag(1 / (alpha + 1e-8)) @ K
+    K1 = np.diag(1 / alpha) @ K
     u = np.ones(m)
     iter_num = 0
 
@@ -14,7 +13,7 @@ def sinkhorn_algorithm(c: NDArray, alpha: NDArray, beta: NDArray, epsilon=0.1, m
         iter_num += 1
         u_prev = u.copy()
         u = 1 / (K1 @ (beta / (K.T @ u)))
-        if np.linalg.norm(u - u_prev) < tol:
+        if np.linalg.norm(u - u_prev, ord=np.inf) < tol:
             break
 
     v = beta / (K.T @ u)

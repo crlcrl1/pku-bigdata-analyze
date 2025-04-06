@@ -8,6 +8,7 @@ def gurobi_solver(c: NDArray, alpha: NDArray, beta: NDArray, *, method: int = 0)
     n = len(beta)
     model = gp.Model("OptimalTransport")
     model.setParam("Method", method)
+    model.setParam("OutputFlag", 0)
 
     pi = model.addVars(m, n, lb=0, name="pi")
 
@@ -25,6 +26,10 @@ def gurobi_solver(c: NDArray, alpha: NDArray, beta: NDArray, *, method: int = 0)
     if model.status == gp.GRB.OPTIMAL:
         solution = np.array([[pi[i, j].X for j in range(n)] for i in range(m)])
         total_cost = model.ObjVal
-        return solution, total_cost, -1
+        if method == 2:
+            iteration_count = int(model.BarIterCount)
+        else:
+            iteration_count = int(model.IterCount)
+        return solution, total_cost, iteration_count
     else:
         raise ValueError("Gurobi solver failed")
