@@ -4,13 +4,13 @@ from numpy.typing import NDArray
 from util import lasso_loss, run_algorithm
 
 
-def prox_solver(A: NDArray, b: NDArray, mu: float) -> tuple[float, NDArray, int]:
+def prox_solver(x0: NDArray, A: NDArray, b: NDArray, mu: float) -> tuple[float, dict]:
     m, n = A.shape
     step_size = 0.01
     mu_list = list(reversed([(5 ** i) * mu for i in range(6)]))
     last_idx = len(mu_list) - 1
     f_last = np.inf
-    x = np.zeros(n)
+    x = x0
     total_iter = 0
 
     grad_last = np.zeros(n)
@@ -46,7 +46,7 @@ def prox_solver(A: NDArray, b: NDArray, mu: float) -> tuple[float, NDArray, int]
 
             f_last = f_new
 
-    return f_last, x, total_iter
+    return x, {"value": f_last, "iterations": total_iter}
 
 
 if __name__ == "__main__":

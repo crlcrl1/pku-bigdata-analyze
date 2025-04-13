@@ -4,12 +4,12 @@ from numpy.typing import NDArray
 from util import lasso_loss, run_algorithm
 
 
-def admm_dual_solver(A: NDArray, b: NDArray, mu: float) -> tuple[float, NDArray, int]:
+def admm_dual_solver(x0: NDArray, A: NDArray, b: NDArray, mu: float) -> tuple[float, dict]:
     m, n = A.shape
     iter_count = 0
     tol = 1e-8
 
-    x = np.ones(n)
+    x = x0
     z = np.zeros(n)
 
     rho = 25
@@ -36,7 +36,8 @@ def admm_dual_solver(A: NDArray, b: NDArray, mu: float) -> tuple[float, NDArray,
         if np.linalg.norm(A.T @ y - z) < tol:
             break
 
-    return lasso_loss(A, b, -x, mu), -x, iter_count
+    loss = lasso_loss(A, b, -x, mu)
+    return x, {"value": loss, "iterations": iter_count}
 
 
 if __name__ == "__main__":

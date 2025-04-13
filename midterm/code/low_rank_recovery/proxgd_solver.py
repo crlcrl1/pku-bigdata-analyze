@@ -4,11 +4,13 @@ from numpy.typing import NDArray
 from util import run_algorithm
 
 
-def proxgd_solver(M: NDArray, omega: NDArray, mu: float, m: int, n: int) -> tuple[float, NDArray, int]:
+def proxgd_solver(
+    M: NDArray, omega: NDArray, mu: float, m: int, n: int
+) -> tuple[float, NDArray, int]:
     X = np.ones((m, n))
     step_size = 1 / 2
     tol = 1e-8
-    mu_list = list(reversed([mu * 2 ** i for i in range(10)]))
+    mu_list = list(reversed([mu * 2**i for i in range(10)]))
     last_index = len(mu_list) - 1
 
     iter_num = 0
@@ -46,4 +48,4 @@ def proxgd_solver(M: NDArray, omega: NDArray, mu: float, m: int, n: int) -> tupl
 
 
 if __name__ == "__main__":
-    run_algorithm(40, 40, 3, 0.3, 0.01, proxgd_solver)
+    run_algorithm(40, 40, 3, 0.5, 0.001, proxgd_solver, benchmark=True)

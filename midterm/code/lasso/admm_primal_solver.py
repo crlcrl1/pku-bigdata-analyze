@@ -4,7 +4,7 @@ from numpy.typing import NDArray
 from util import lasso_loss, run_algorithm
 
 
-def admm_primal_solver(A: NDArray, b: NDArray, mu: float) -> tuple[float, NDArray, int]:
+def admm_primal_solver(_x0: NDArray, A: NDArray, b: NDArray, mu: float) -> tuple[float, dict]:
     m, n = A.shape
     y = np.zeros(n)
     z = np.zeros(n)
@@ -36,7 +36,8 @@ def admm_primal_solver(A: NDArray, b: NDArray, mu: float) -> tuple[float, NDArra
         if np.linalg.norm(x - z) < tol:
             break
 
-    return lasso_loss(A, b, x, mu), x, iter_count
+    loss = lasso_loss(A, b, x, mu)
+    return x, {"value": loss, "iterations": iter_count}
 
 
 if __name__ == "__main__":

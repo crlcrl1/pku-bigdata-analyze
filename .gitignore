@@ -171,3 +171,6 @@ cython_debug/
 *.synctex.gz
 *.pdf
 
+# Handin files
+*.tar.gz
+*.zip

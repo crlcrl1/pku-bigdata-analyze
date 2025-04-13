@@ -4,7 +4,7 @@ from numpy.typing import NDArray
 from util import lasso_loss, run_algorithm
 
 
-def pdhg_solver(A: NDArray, b: NDArray, mu: float) -> tuple[float, NDArray, int]:
+def pdhg_solver(x0: NDArray, A: NDArray, b: NDArray, mu: float) -> tuple[float, dict]:
     m, n = A.shape
     max_eigval = np.sqrt(np.max(np.linalg.eigvalsh(A @ A.T)))
     step_size_z = 2 / max_eigval
@@ -12,7 +12,7 @@ def pdhg_solver(A: NDArray, b: NDArray, mu: float) -> tuple[float, NDArray, int]
     mu_list = list(reversed([(5 ** i) * mu for i in range(5)]))
     last_idx = len(mu_list) - 1
 
-    x = np.zeros(n)
+    x = x0
     z = np.zeros(m)
     f_last = np.inf
     tol = 1e-8
@@ -37,7 +37,7 @@ def pdhg_solver(A: NDArray, b: NDArray, mu: float) -> tuple[float, NDArray, int]
                 break
             f_last = f_new
 
-    return f_last, x, iter_count
+    return x, {"value": f_last, "iterations": iter_count}
 
 
 if __name__ == "__main__":

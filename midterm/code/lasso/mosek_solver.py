@@ -4,7 +4,7 @@ from mosek.fusion import Model, Domain, Expr, ObjectiveSense
 from numpy.typing import NDArray
 
 
-def mosek_solver(A: NDArray, b: NDArray, mu: float) -> tuple[float, NDArray, int]:
+def mosek_solver(_x0: NDArray, A: NDArray, b: NDArray, mu: float) -> tuple[float, dict]:
     m, n = A.shape
     with Model("LASSO") as model:
         x = model.variable("x", n, Domain.unbounded())
@@ -21,14 +21,18 @@ def mosek_solver(A: NDArray, b: NDArray, mu: float) -> tuple[float, NDArray, int
 
         model.constraint(Expr.vstack(q, r), Domain.inQCone())
 
-        model.objective(ObjectiveSense.Minimize, Expr.add(Expr.mul(mu, Expr.sum(t)), Expr.mul(0.5, q)))
+        model.objective(
+            ObjectiveSense.Minimize,
+            Expr.add(Expr.mul(mu, Expr.sum(t)), Expr.mul(0.5, q)),
+        )
 
         model.solve()
 
         x_opt = x.level()
         obj_val = model.primalObjValue()
-        return obj_val, x_opt, -1
+        iter_num = model.getSolverIntInfo("intpntIter")
+        return x_opt, {"value": obj_val, "iterations": iter_num}
 
 
 if __name__ == "__main__":
-    run_algorithm(512, 1024, 0.1, 0, 0.01, mosek_solver)
+    run_algorithm(512, 1024, 0.1, 0, 0.01, mosek_solver, benchmark=True)

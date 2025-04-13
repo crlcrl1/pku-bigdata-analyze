@@ -4,7 +4,9 @@ from numpy.typing import NDArray
 from util import run_algorithm
 
 
-def admm_solver(M: NDArray, omega: NDArray, mu: float, m: int, n: int) -> tuple[float, NDArray, int]:
+def admm_solver(
+    M: NDArray, omega: NDArray, mu: float, m: int, n: int
+) -> tuple[float, NDArray, int]:
     X = np.zeros((m, n))
     Y = np.zeros((m, n))
     Z = np.zeros((m, n))
@@ -36,8 +38,12 @@ def admm_solver(M: NDArray, omega: NDArray, mu: float, m: int, n: int) -> tuple[
         if np.linalg.norm(X - Z) < tol:
             break
 
-    return np.linalg.norm(Z.flat[omega] - M) ** 2 + mu * np.linalg.norm(Z, ord="nuc"), Z, iter_num
+    return (
+        np.linalg.norm(Z.flat[omega] - M) ** 2 + mu * np.linalg.norm(Z, ord="nuc"),
+        Z,
+        iter_num,
+    )
 
 
 if __name__ == "__main__":
-    run_algorithm(40, 40, 3, 0.3, 0.01, admm_solver)
+    run_algorithm(40, 40, 3, 0.5, 0.001, admm_solver, benchmark=True)

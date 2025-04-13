@@ -21,7 +21,7 @@ def admm_primal_solver(A: Tensor, b: Tensor, mu: float) -> tuple[float, Tensor, 
 
     zeros = torch.zeros_like(z)
 
-    # @torch.compile
+    @torch.compile
     def iterate(z: Tensor, y: Tensor) -> tuple[Tensor, Tensor, Tensor]:
         x = inv @ (temp + rho * z - y)
 
@@ -47,4 +47,4 @@ def admm_primal_solver(A: Tensor, b: Tensor, mu: float) -> tuple[float, Tensor, 
 
 
 if __name__ == "__main__":
-    run_algorithm(512, 1024, 0.1, 0, 0.01, admm_primal_solver)
+    run_algorithm(512, 1024, 0.1, 0, 0.01, admm_primal_solver, benchmark=True)
