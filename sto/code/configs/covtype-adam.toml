@@ -1,0 +1,14 @@
+[general]
+name = "covtype-adam"
+epochs = 500
+num_features = 54
+lambda = 0.0001
+
+[data]
+train_file = "data/covtype_train.pt"
+test_file = "data/covtype_test.pt"
+
+[optimizer]
+name = "adam"
+lr = 0.007
+batch_size = 102400

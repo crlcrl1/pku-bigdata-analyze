@@ -170,7 +170,11 @@ cython_debug/
 *.out
 *.synctex.gz
 *.pdf
+# Keep figures
+!**/fig/**.pdf
 
 # Handin files
 *.tar.gz
 *.zip
+
+*.pt

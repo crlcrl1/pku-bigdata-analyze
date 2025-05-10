@@ -1,0 +1,14 @@
+[general]
+name = "covtype-adagrad"
+epochs = 500
+num_features = 54
+lambda = 0.00008
+
+[data]
+train_file = "data/covtype_train.pt"
+test_file = "data/covtype_test.pt"
+
+[optimizer]
+name = "adagrad"
+lr = 0.2
+batch_size = 102400

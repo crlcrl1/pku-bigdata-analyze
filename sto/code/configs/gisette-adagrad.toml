@@ -1,0 +1,14 @@
+[general]
+name = "gisette-adagrad"
+epochs = 1000
+num_features = 5000
+lambda = 0.001
+
+[data]
+train_file = "data/gisette_train.pt"
+test_file = "data/gisette_test.pt"
+
+[optimizer]
+name = "adagrad"
+lr = 0.025
+batch_size = 1024

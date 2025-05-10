@@ -1,0 +1,14 @@
+[general]
+name = "gisette-adam"
+epochs = 1000
+num_features = 5000
+lambda = 0.001
+
+[data]
+train_file = "data/gisette_train.pt"
+test_file = "data/gisette_test.pt"
+
+[optimizer]
+name = "adam"
+lr = 0.001
+batch_size = 1024
