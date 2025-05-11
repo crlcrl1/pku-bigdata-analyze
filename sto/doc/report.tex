@@ -1,0 +1,95 @@
+\documentclass{article}
+
+\usepackage{neurips_2022}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{hyperref}
+\usepackage{url}
+\usepackage{booktabs}
+\usepackage{amsfonts}
+\usepackage{nicefrac}
+\usepackage{microtype}
+\usepackage{xcolor}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage[UTF8, fontset=adobe]{ctex}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{resizegather}
+\usepackage{graphicx}
+\usepackage{subfigure}
+
+\hypersetup{
+    colorlinks=true,
+    linkbordercolor=white
+}
+\setlength{\parindent}{2em}
+
+\title{随机优化算法上机报告}
+
+\author{陈润璘 \texttt{2200010848}}
+
+\begin{document}
+
+\maketitle
+
+\section{背景与目的}
+随机优化算法（如Adagrad与Adam）在大规模机器学习任务中具有重要应用。本次上机作业实现了 Adagrad 和 Adam 优化器，对比并分析了其在模型训练中的表现。
+
+\section{算法原理}
+\subsection{Adagrad}
+Adagrad是一种自适应学习率优化算法，其对每个参数维护一个累计平方梯度的和，根据历史梯度自动调整学习率。其参数更新公式为：
+\begin{equation}
+    \theta_{t+1} = \theta_t - \frac{\eta}{\sqrt{G_t + \epsilon}} \odot g_t
+\end{equation}
+其中$G_t$为累计平方梯度，$\epsilon$ 为平滑项。
+
+\subsection{Adam}
+Adam 结合了动量法和 RMSProp 的思想，分别对一阶矩和二阶矩进行估计。其参数更新步骤如下：
+\begin{align}
+    m_t &= \beta_1 m_{t-1} + (1-\beta_1)g_t \\
+    v_t &= \beta_2 v_{t-1} + (1-\beta_2)g_t^2 \\
+    \hat{m}_t &= \frac{m_t}{1-\beta_1^t} \\
+    \hat{v}_t &= \frac{v_t}{1-\beta_2^t} \\
+    \theta_{t+1} &= \theta_t - \frac{\eta}{\sqrt{\hat{v}_t}+\epsilon} \hat{m}_t
+\end{align}
+
+\section{实验设计}
+\begin{itemize}
+    \item \textbf{数据集：} 使用 LIBSVM 中的 \texttt{covtype} 和 \texttt{gisette} 数据集，它们是两个分别有 54 和 5000 特征的二分类数据集。
+    \item \textbf{模型结构：} 线性分类器，损失函数为 $1-\tanh(y\cdot f(x))$，同时添加 $L_2$ 正则项。
+    \item \textbf{优化器：} 实现Adagrad和Adam两种优化器，分别训练模型。
+    \item \textbf{评估指标：} 训练误差、测试误差与测试集准确率。
+\end{itemize}
+
+\section{实验结果与分析}
+
+本次上机作用基于 PyTorch 框架实现了 Adagrad 和 Adam 优化器，具体的超参数见 \texttt{code/configs} 中的配置文件。在训练过程中，两个优化器使用了相同的 batch size 和正则化参数，并且训练相同数量的 epoch。两个优化器在两个数据集上的训练结果如下：
+
+\begin{figure}[h]
+    \centering
+    \subfigure[Adagrad on covtype]{
+        \includegraphics[width=0.45\textwidth]{fig/covtype-adagrad.pdf}
+    }
+    \subfigure[Adam on covtype]{
+        \includegraphics[width=0.45\textwidth]{fig/covtype-adam.pdf}
+    }
+    \caption{Adagrad 和 Adam 在 \texttt{covtype} 数据集上的训练和测试误差}
+    \label{fig:covtype_results}
+\end{figure}
+
+\begin{figure}[h]
+    \centering
+    \subfigure[Adagrad on gisette]{
+        \includegraphics[width=0.45\textwidth]{fig/gisette-adagrad.pdf}
+    }
+    \subfigure[Adam on gisette]{
+        \includegraphics[width=0.45\textwidth]{fig/gisette-adam.pdf}
+    }
+    \caption{Adagrad 和 Adam 在 \texttt{gisette} 数据集上的训练和测试误差}
+    \label{fig:gisette_results}
+\end{figure}
+
+在数据集 \texttt{covtype} 上，Adagrad 和 Adam 在测试集上的准确率分别为 $76.28\%$ 和 $76.47\%$，在数据集 \texttt{gisette} 上，Adagrad 和 Adam 的准确率分别为 $95.20\%$ 和 $97.20\%$。从模型在测试集上的准确率来看，Adam 优化器略优于 Adagrad。但是，从图 \ref{fig:gisette_results} 中可以看出，Adam 在训练时的稳定性明显高于 Adagrad，误差的波动幅度更小。这是由于 \texttt{gisette} 的规模相对较小，Adam 记录了更多的历史信息，因此受梯度噪声的影响更小。
+
+\end{document}
