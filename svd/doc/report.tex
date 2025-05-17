@@ -1,0 +1,91 @@
+\documentclass{article}
+
+\usepackage{neurips_2022}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{hyperref}
+\usepackage{url}
+\usepackage{booktabs}
+\usepackage{amsfonts}
+\usepackage{nicefrac}
+\usepackage{microtype}
+\usepackage{xcolor}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage[UTF8, fontset=adobe]{ctex}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{resizegather}
+\usepackage{graphicx}
+\usepackage{subfigure}
+
+\hypersetup{
+    colorlinks=true,
+    linkbordercolor=white
+}
+\setlength{\parindent}{2em}
+
+\title{随机奇异值分解算法上机报告}
+
+\author{陈润璘 \texttt{2200010848}}
+
+\begin{document}
+
+\maketitle
+
+\section{问题描述}
+
+奇异值分解是矩阵分析和数据降维中的重要工具。对于大规模矩阵，直接计算SVD的计算复杂度较高，
+难以满足实际应用中对效率的要求。因此，设计高效地计算一个矩阵前 $k$ 个奇异值和奇异向量的近似算法显得尤为重要。
+
+\section{数值方法}
+
+本次上机作业实现了一种基于概率采样的 SVD 近似算法。其步骤如下：
+
+\begin{algorithm}
+    \caption{随机奇异值分解算法}
+    \begin{algorithmic}[1]
+        \State 输入矩阵 $A \in \mathbb{R}^{m \times n}$，目标秩 $k$，采样列数
+        $c$，以及每一列的采样概率 $p$
+        \State 以 $p_i$ 的概率采样第 $i$ 列，总共采样 $c$ 列，得到 $A^{i_1},
+        A^{i_2},\dots,A^{i_c}$
+        \State 以 $\frac{A^{i_t}}{\sqrt{cp_{i_t}}}$ 组成 $m\times c$ 的矩阵 $C$。
+        \State 计算 $C^T C$ 的特征值分解，得到 $C^T C =
+        \sum_{t=1}^{c}\sigma_t^2(C)y_t y_t^T$。
+        \State 取前 $k$ 个特征值为 $A$ 的近似奇异值，其对应的左奇异向量为 $\frac{Cy_t}{\sigma_t(C)}$。
+    \end{algorithmic}
+    \label{alg:svd}
+\end{algorithm}
+
+上述算法仅需计算一个 $c\times c$ 的对称矩阵的特征值分解，当 $c$ 远小于 $m$ 和 $n$ 时，比直接计算一个
+$m\times m$ 或 $n\times n$ 的矩阵的特征值分解计算量要小得多。
+
+对于每一列的采样概率 $p$ 的选取，可以取 $p_i =
+\frac{\|A^i\|_2^2}{\sum_{j=1}^{n}\|A^j\|_2^2}$。在这种选取下，$C C^T$ 能最好地近似
+$A A^T$，从而 $C^T C$ 与 $A^T A$ 的非零特征值最接近。
+
+\section{数值结果}
+
+在本次上机作业中，我们分别使用一个秩为 20 的随机生成的 $2048\times 512$ 的矩阵和一张 $4096\times
+3072$ 的图片作为输入矩阵，分别取 $c = 50, 100, 150, 200$，绘制了在 $c$ 的不同取值下计算得出的前 $k$
+个奇异值的相对误差和下标 $k$ 的分布图。其中，$2048\times 512$ 的矩阵由两个元素为标准正态分布的
+$2048\times 20$ 和 $20\times 512$ 的矩阵相乘得到，$4096\times 3072$ 的图片由原图转换为灰度图后得到。
+
+\begin{figure}[ht]
+    \centering
+    \subfigure[随机生成的 $2048\times 512$ 的矩阵的结果]{
+        \includegraphics[width=0.45\textwidth]{fig/relative_error_matrix.pdf}
+    }
+    \subfigure[$4096\times 3072$ 的图片的结果]{
+        \includegraphics[width=0.45\textwidth]{fig/relative_error_img.pdf}
+    }
+    \caption{随机奇异值分解算法的数值结果}
+    \label{fig:svd_result}
+\end{figure}
+
+从图 \ref{fig:svd_result} 中可以看出，随着 $c$ 的增大，计算得到的前 $k$
+个奇异值的相对误差逐渐减小，但是两个算例中误差随 $k$ 的变化却呈现了不同的规律。对于随机生成的 $2048\times 512$
+的矩阵，第 $k$ 个奇异值的相对误差随着 $k$ 的增大先减小，再增大，在 $k=9$ 附近达到最小值。而对于 $4096\times
+3072$ 的图片，第 $k$ 个奇异值的相对误差随着 $k$ 的增大呈现增大的趋势。这可能是因为两个矩阵的结构不同，导致了误差的变化情况不同。
+
+\end{document}
