@@ -1,0 +1,175 @@
+\documentclass{article}
+
+\usepackage{neurips_2022}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{hyperref}
+\usepackage{url}
+\usepackage{booktabs}
+\usepackage{amsfonts}
+\usepackage{nicefrac}
+\usepackage{microtype}
+\usepackage{xcolor}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage[UTF8, fontset=adobe]{ctex}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{resizegather}
+\usepackage{graphicx}
+\usepackage{subfigure}
+\usepackage{flafter}
+
+\hypersetup{
+    colorlinks=true,
+    linkbordercolor=white
+}
+\setlength{\parindent}{2em}
+
+\title{相位恢复上机报告}
+
+\author{陈润璘 \texttt{2200010848}}
+
+\begin{document}
+
+\maketitle
+
+\section{问题描述}
+
+相位恢复问题是指从信号的幅值（强度）测量中恢复其相位信息。在数学上，给定向量 $x \in \mathbb{C}^n$，我们只能观测到
+$y_j = |\left<a_j, x\right>|^2$，其中 $a_j \in \mathbb{C}^{n}$
+是一个已知矩阵，$y_j$ 是测量值。我们的目标是恢复原始信号 $x$（或其相位等价形式）。
+
+本次上机作业中，我们考虑两种情形：
+\begin{enumerate}
+    \item 高斯随机测量：测量矩阵 $A = (a_1, \dots , a_m)$ 的元素是从复高斯分布中随机抽取的。
+    \item 编码衍射图样（Coded Diffraction Pattern，CDP）：使用特定的掩模结构进行测量。
+\end{enumerate}
+
+\section{数值方法}
+
+为了解决相位恢复问题，本实验采用基于绝对最小二乘的次梯度下降方法。我们考虑优化目标函数：
+
+\begin{equation}
+    f(z) = \frac{1}{m}\sum_{j=1}^{m}||\left<a_j, x\right>|^2 - y_j|
+\end{equation}
+
+其中 $z$ 是我们要优化的估计向量，$a_j$ 是测量向量，$y_j$ 是观测到的强度值。
+
+\subsection{初始化策略}
+
+由于优化问题是非凸的，因此良好的初始值对于非凸优化问题至关重要。我们可以选取初始值为
+\begin{equation}
+    Y = \frac{1}{m}\sum_{j=1}^{m} y_j \cdot a_j a_j^*
+\end{equation}
+的最大特征值对应的特征向量，由此得到一个相位接近真实值的初始解，其中最大特征值可以通过幂法求得。
+
+\subsection{次梯度下降算法}
+
+我们采用次梯度下降法优化目标函数，算法流程如下：
+
+\begin{algorithm}
+    \caption{绝对最小二乘相位恢复算法}
+    \begin{algorithmic}[1]
+        \State 使用上述方法初始化 $z$
+        \State 初始化最佳值 best\_value $\gets \infty$，最佳解 best\_z $\gets$ z
+        \For{$k = 0, 1, \ldots, \text{num\_iter}-1$}
+        \State 计算当前目标函数值 current\_obj\_val
+        \If{current\_obj\_val < best\_value}
+        \State best\_value $\gets$ current\_obj\_val
+        \State best\_z $\gets$ z
+        \EndIf
+        \State 计算 $s = \mathcal{A}(z)$
+        \State 计算残差 $g = |s|^2 - y$
+        \State 计算梯度 $\nabla f(z) = \frac{1}{m} \cdot
+        \mathcal{A}^*(\text{sign}(g) \cdot 2s)$
+        \State 根据迭代轮数 $k$ 确定步长 $\eta_k$
+        \State 更新 $z \gets z - \eta_k \cdot \nabla f(z)$
+        \EndFor
+        \State 返回 best\_z
+    \end{algorithmic}
+\end{algorithm}
+
+本实验中，我们对两种不同的测量矩阵（高斯随机矩阵和CDP）采用了不同的步长调度策略：
+
+\begin{itemize}
+    \item 高斯情形：前200次迭代 $\eta_k = \frac{1}{k+1}$，之后 $\eta_k =
+        \frac{1}{(k+1)^{1.3}}$
+    \item CDP情形：前2000次迭代 $\eta_k = \frac{1}{(k+1)^{0.3}}$，之后 $\eta_k
+        = \frac{1}{k+1}$
+\end{itemize}
+
+\subsection{评估指标}
+
+由于相位恢复问题只能恢复信号的相位等价类，我们使用相对误差来评估恢复质量：
+
+\begin{equation}
+    \text{rel\_error}(x, z) = \frac{\|x - e^{-i\angle\langle x,
+    z\rangle} \cdot z\|_2}{\|x\|_2}
+\end{equation}
+
+其中 $\angle\langle x, z\rangle$ 是 $x$ 和 $z$ 内积的相角，$e^{-i\angle\langle
+x, z\rangle}$ 表示对 $z$ 进行相位校正。
+
+\section{数值结果}
+
+\subsection{高斯随机测量}
+
+在高斯随机测量情况下，我们设置信号维度 $n = 128$，测量数量 $m \approx 4.5n = 576$。
+测量矩阵 $A \in\mathbb{C}^{m \times n}$ 的元素从复高斯分布 $\mathcal{CN}(0,
+\frac{1}{2})$ 中随机生成。
+
+实验结果显示，绝对最小二乘方法在高斯随机测量情况下表现良好。我们使用5000次迭代，最终相对误差的大小为 $1.4585\times 10^{-4}$。
+目标函数值随迭代次数的变化如图 \ref{fig:gaussian} 所示。
+从图中可以看出，目标函数值随着迭代次数的增加而迅速下降，表明算法收敛效果良好。同时，目标函数值在迭代过程中呈现了次梯度法常见的震荡下降现象。
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.55\textwidth]{fig/gaussian.pdf}
+    \caption{高斯随机测量下目标函数值随迭代次数的变化}
+    \label{fig:gaussian}
+\end{figure}
+
+\subsection{编码衍射图样（CDP）}
+
+在CDP情况下，我们同样设置信号维度 $n = 128$，但使用了特殊的测量结构。我们生成 $l = 6$ 个掩模，每个掩模中的元素从集合
+$\{1, -1, i, -i\}$ 中随机选取，并根据一定概率（$20\%$）赋予不同的权重（$\sqrt{3}$ 或 $1/\sqrt{2}$）。
+
+在 5000 次迭代后，最终相对误差的大小为 $1.1782\times 10^{-4}$。
+目标函数值随迭代次数的变化如图 \ref{fig:cdp} 所示。
+从图中可以看出，目标函数值在迭代过程中同样呈现了震荡下降的趋势，但收敛速度更快，且最终得到的相对误差较小。与高斯随机测量相比，CDP
+方法通过设计特定的掩模结构，使用了更少的测量次数和计算代价并获得了更高的恢复精度。
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.55\textwidth]{fig/cdp.pdf}
+    \caption{CDP下目标函数值随迭代次数的变化}
+    \label{fig:cdp}
+\end{figure}
+
+\subsection{真实图像恢复}
+
+除了随机生成的数据，我们还对一张真实图像进行了相位恢复实验。图像被转换为灰度图，并归一化至[0,1]范围内。
+在这个实验中，我们使用了 30 个掩模，每个掩模的产生方式与CDP相同。
+
+实验结果显示，即使在较少的迭代次数（1000次）下，算法也能有效地恢复图像。
+最终的相对误差约为 $1.4878\times 10^{-4}$，而目标函数值约为 $2.7345$。
+图 \ref{fig:image_opt} 显示了优化过程中的目标函数值变化，
+图 \ref{fig:reconstructed} 显示了原始图像与重建图像的对比。
+
+\begin{figure}[h]
+    \centering
+    \subfigure[优化过程中的目标函数值]{
+        \includegraphics[width=0.45\textwidth]{fig/real_image.pdf}
+        \label{fig:image_opt}
+    }
+    \subfigure[原始图像与重建图像的对比]{
+        \includegraphics[width=0.45\textwidth]{fig/real_image_reconstructed.pdf}
+        \label{fig:reconstructed}
+    }
+    \caption{真实图像的相位恢复结果}
+    \label{fig:real_image}
+\end{figure}
+
+从重建效果来看，算法能够很好地保留图像的主要特征和细节，这表明我们的相位恢复方法不仅适用于理论数据，也能处理实际的图像恢复问题。
+
+\end{document}
